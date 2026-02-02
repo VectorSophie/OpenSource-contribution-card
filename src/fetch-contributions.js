@@ -139,8 +139,11 @@ export async function fetchContributions(username, token = null) {
     }
 
     if (!repoMap.has(repoFullName)) {
+      const owner = repoFullName.split('/')[0];
       repoMap.set(repoFullName, {
         name: repoFullName,
+        owner: owner,
+        avatarUrl: `https://github.com/${owner}.png?size=40`,
         prs: [],
         latestMerge: null
       });
@@ -148,12 +151,15 @@ export async function fetchContributions(username, token = null) {
 
     const repo = repoMap.get(repoFullName);
     const mergedAt = item.pull_request?.merged_at || null;
+    
+    const labels = Array.isArray(item.labels) ? item.labels.map(l => l.name) : [];
 
     repo.prs.push({
       number: item.number || 0,
       title: item.title || 'Untitled PR',
       url: item.html_url || '',
-      mergedAt: mergedAt
+      mergedAt: mergedAt,
+      labels: labels
     });
 
     // 가장 최근 merge 날짜 업데이트
